@@ -20,7 +20,7 @@ function App() {
 
     try {
       // 调用后端API
-      const response = await axios.post('http://localhost:3001/api/remove-watermark', {
+      const response = await axios.post('/api/remove-watermark', {
         url: url
       });
       
