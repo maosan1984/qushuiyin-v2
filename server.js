@@ -74,7 +74,7 @@ function requestApi(apiUrl, method, data = {}) {
 async function removeWatermark(videoUrl) {
   // 使用用户提供的API
   const apiUrl = 'https://api.wxshares.com/api/qsy/plus';
-  const apiKey = '9S2D1RBc01PfFgdifapwoc36PC';
+  const apiKey = process.env.API_KEY || '9S2D1RBc01PfFgdifapwoc36PC';
   const params = { 
     url: videoUrl,
     key: apiKey
