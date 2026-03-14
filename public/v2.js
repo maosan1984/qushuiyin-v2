@@ -1,4 +1,4 @@
-﻿import { extractFirstHttpUrl } from "/v2-url.js";
+import { extractFirstHttpUrl } from "/v2-url.js";
 
 const inputEl = document.getElementById("videoUrl");
 const runBtn = document.getElementById("runBtn");

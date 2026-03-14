@@ -1,20 +1,20 @@
+﻿import { faviconSvg, iconsSvg, v2Html, v2Js, v2UrlJs } from "./assets.ts";
+
 const API_URL = Deno.env.get("API_URL") || "https://api.wxshares.com/api/qsy/plus";
 const API_KEY = Deno.env.get("API_KEY") || "";
 
 const textEncoder = new TextEncoder();
 
 const ASSET_FILES = {
-  "/": { file: "../public/v2.html", type: "text/html; charset=utf-8" },
-  "/v2.html": { file: "../public/v2.html", type: "text/html; charset=utf-8" },
-  "/v2.js": { file: "../public/v2.js", type: "application/javascript; charset=utf-8" },
-  "/v2-url.js": { file: "../public/v2-url.js", type: "application/javascript; charset=utf-8" },
-  "/favicon.svg": { file: "../public/favicon.svg", type: "image/svg+xml" },
-  "/icons.svg": { file: "../public/icons.svg", type: "image/svg+xml" },
+  "/": { body: v2Html, type: "text/html; charset=utf-8" },
+  "/v2.html": { body: v2Html, type: "text/html; charset=utf-8" },
+  "/v2.js": { body: v2Js, type: "application/javascript; charset=utf-8" },
+  "/v2-url.js": { body: v2UrlJs, type: "application/javascript; charset=utf-8" },
+  "/favicon.svg": { body: faviconSvg, type: "image/svg+xml" },
+  "/icons.svg": { body: iconsSvg, type: "image/svg+xml" },
 } as const;
 
 type AssetPath = keyof typeof ASSET_FILES;
-
-const assetCache = new Map<string, Uint8Array>();
 
 function withCors(headers = new Headers()) {
   headers.set("Access-Control-Allow-Origin", "*");
@@ -36,27 +36,10 @@ function getAssetPathname(pathname: string): AssetPath | "" {
   return "";
 }
 
-async function readAsset(pathname: AssetPath) {
-  const cached = assetCache.get(pathname);
-  if (cached) {
-    return cached;
-  }
-
-  const assetUrl = new URL(ASSET_FILES[pathname].file, import.meta.url);
-  const asset = await Deno.readFile(assetUrl);
-  assetCache.set(pathname, asset);
-  return asset;
-}
-
 async function serveAsset(pathname: AssetPath) {
-  try {
-    const body = await readAsset(pathname);
-    const headers = withCors();
-    headers.set("Content-Type", ASSET_FILES[pathname].type);
-    return new Response(body, { status: 200, headers });
-  } catch {
-    return new Response("Not Found", { status: 404 });
-  }
+  const headers = withCors();
+  headers.set("Content-Type", ASSET_FILES[pathname].type);
+  return new Response(ASSET_FILES[pathname].body, { status: 200, headers });
 }
 
 function encodeMediaToken(url: string) {
