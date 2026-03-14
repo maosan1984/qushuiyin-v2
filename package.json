@@ -1,31 +1,37 @@
-{
-  "name": "-",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "axios": "^1.13.6",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.0",
-    "eslint": "^9.39.4",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.4.0",
-    "vite": "^8.0.0"
-  }
+﻿{
+    "name":  "-",
+    "private":  true,
+    "version":  "0.0.0",
+    "type":  "module",
+    "engines":  {
+                    "node":  "\u003e=18.0.0"
+                },
+    "scripts":  {
+                    "dev":  "vite",
+                    "dev:v2:api":  "node server-v2.js",
+                    "cf:dev":  "npx wrangler dev",
+                    "cf:deploy":  "npx wrangler deploy",
+                    "cf:secret":  "npx wrangler secret put API_KEY",
+                    "test:v2":  "node --test tests/v2-url.test.mjs",
+                    "build":  "vite build",
+                    "lint":  "eslint .",
+                    "preview":  "vite preview",
+                    "test:cf":  "node --test tests/cloudflare-worker.test.mjs"
+                },
+    "dependencies":  {
+                         "axios":  "^1.13.6",
+                         "react":  "^19.2.4",
+                         "react-dom":  "^19.2.4"
+                     },
+    "devDependencies":  {
+                            "@eslint/js":  "^9.39.4",
+                            "@types/react":  "^19.2.14",
+                            "@types/react-dom":  "^19.2.3",
+                            "@vitejs/plugin-react":  "^6.0.0",
+                            "eslint":  "^9.39.4",
+                            "eslint-plugin-react-hooks":  "^7.0.1",
+                            "eslint-plugin-react-refresh":  "^0.5.2",
+                            "globals":  "^17.4.0",
+                            "vite":  "^8.0.0"
+                        }
 }
