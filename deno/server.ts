@@ -2,6 +2,8 @@
 
 const API_URL = Deno.env.get("API_URL") || "https://api.wxshares.com/api/qsy/plus";
 const API_KEY = Deno.env.get("API_KEY") || "";
+const UPSTREAM_TIMEOUT_MS = 15000;
+const MEDIA_TIMEOUT_MS = 20000;
 
 const textEncoder = new TextEncoder();
 
@@ -69,16 +71,33 @@ async function callUpstream(videoUrl: string) {
     };
   }
 
-  const upstream = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url: videoUrl,
-      key: API_KEY,
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+
+  let upstream: Response;
+  try {
+    upstream = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: videoUrl,
+        key: API_KEY,
+      }),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    clearTimeout(timeout);
+    if (error instanceof Error && error.name === "AbortError") {
+      return {
+        success: false,
+        message: "解析服务响应超时，请稍后重试。",
+      };
+    }
+    throw error;
+  }
+  clearTimeout(timeout);
 
   let payload: any = null;
   try {
@@ -140,15 +159,24 @@ async function proxyMedia(request: Request, mediaUrl: string, forceDownload: boo
     headers.set("Range", range);
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), MEDIA_TIMEOUT_MS);
+
   let upstream: Response;
   try {
     upstream = await fetch(parsed.toString(), {
       headers,
       redirect: "follow",
+      signal: controller.signal,
     });
-  } catch {
+  } catch (error) {
+    clearTimeout(timeout);
+    if (error instanceof Error && error.name === "AbortError") {
+      return jsonResponse({ success: false, message: "视频响应超时，请稍后重试。" }, 504);
+    }
     return jsonResponse({ success: false, message: "Media fetch failed." }, 502);
   }
+  clearTimeout(timeout);
 
   const responseHeaders = withCors();
   for (const name of [

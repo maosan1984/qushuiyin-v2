@@ -1,9 +1,10 @@
-import { extractFirstHttpUrl } from "/v2-url.js";
+﻿import { extractFirstHttpUrl } from "/v2-url.js";
 
 const inputEl = document.getElementById("videoUrl");
 const runBtn = document.getElementById("runBtn");
 const errorBox = document.getElementById("errorBox");
 const resultBox = document.getElementById("resultBox");
+const CLIENT_TIMEOUT_MS = 20000;
 
 function setBusy(busy) {
   runBtn.disabled = busy;
@@ -73,12 +74,17 @@ async function parseVideo() {
   inputEl.value = normalizedUrl;
   setBusy(true);
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+
   try {
     const response = await fetch("/api/v2/remove-watermark", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: normalizedUrl }),
+      signal: controller.signal,
     });
+    clearTimeout(timeout);
 
     let payload = null;
     try {
@@ -93,6 +99,11 @@ async function parseVideo() {
 
     renderResult(payload.data || {});
   } catch (error) {
+    clearTimeout(timeout);
+    if (error?.name === "AbortError") {
+      showError("\u89e3\u6790\u8d85\u65f6\u4e86\uff0c\u8bf7\u6362\u4e00\u6761\u94fe\u63a5\u6216\u7a0d\u540e\u518d\u8bd5\u3002");
+      return;
+    }
     showError(error.message || "\u89e3\u6790\u5931\u8d25\uff0c\u8bf7\u7a0d\u540e\u518d\u8bd5\u3002");
   } finally {
     setBusy(false);
